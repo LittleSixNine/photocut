@@ -39,6 +39,9 @@ dist/
 *.JPG
 *.PNG
 
+# Curated, metadata-free images used by the public README.
+!assets/readme/*.jpg
+
 # Research and local runs never belong in the public checkout.
 /experiments/
 

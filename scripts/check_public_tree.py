@@ -10,6 +10,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_LARGE_FILES = {"photocut/models/v8_2/model.onnx"}
+ALLOWED_IMAGE_FILES = {
+    "assets/readme/example-01-after.jpg",
+    "assets/readme/example-01-before.jpg",
+    "assets/readme/example-02-after.jpg",
+    "assets/readme/example-02-before.jpg",
+}
 FORBIDDEN_PARTS = {
     ".photocut",
     ".local",
@@ -60,7 +66,11 @@ def main() -> int:
         size = path.stat().st_size
         if size > 5 * 1024 * 1024 and relative not in ALLOWED_LARGE_FILES:
             errors.append(f"unexpected file larger than 5 MiB: {relative}")
-        if path.suffix.lower() in {".jpg", ".jpeg", ".png", ".heic", ".tif", ".tiff", ".dng"}:
+        if (
+            path.suffix.lower()
+            in {".jpg", ".jpeg", ".png", ".heic", ".tif", ".tiff", ".dng"}
+            and relative not in ALLOWED_IMAGE_FILES
+        ):
             errors.append(f"image file is tracked: {relative}")
         if path.suffix.lower() not in TEXT_SUFFIXES:
             continue
