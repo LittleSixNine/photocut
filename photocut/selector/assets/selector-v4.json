@@ -1,0 +1,42 @@
+{
+  "agreement": {
+    "max_mean_normalized_corner_distance": 0.005,
+    "minimum_polygon_iou": 0.98
+  },
+  "cascade_version": "auto-v4",
+  "hard_risks": [
+    "cancelled",
+    "invalid_mask",
+    "multiple_primary_ambiguity",
+    "no_photo_evidence",
+    "provider_error",
+    "strong_three_way_conflict",
+    "v7_edge_unresolved_conflict"
+  ],
+  "max_v52_calls": 1,
+  "max_v7_calls": 2,
+  "max_v8_calls": 1,
+  "scanner_white_default_engine": "v8",
+  "schema_version": 1,
+  "semantic_terminal_reasons": [
+    "cancelled",
+    "multiple_primary_ambiguity",
+    "no_photo_evidence",
+    "no_primary_photo"
+  ],
+  "semantic_terminal_statuses": [
+    "cancelled",
+    "no_photo_evidence",
+    "no_primary_photo"
+  ],
+  "v52_witness_auto_accept": false,
+  "v52_worker_timeout_s": 3.0,
+  "witness_reason_allowlist": [
+    "insufficient_scanner_exterior_evidence",
+    "unstable_edge_ranking",
+    "unstable_v7_edge_rescue",
+    "unsupported_single_source_selection",
+    "weak_mask_evidence",
+    "weak_unopposed_edge_evidence"
+  ]
+}

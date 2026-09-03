@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "samples": [
+    {"id": "13d289eef09b…", "failure_category": "scanner_outer_frame"},
+    {"id": "a5bcfea9c6c2…", "failure_category": "white_margin"},
+    {"id": "d7688826a899…", "failure_category": "perspective_severe"}
+  ]
+}

@@ -1,0 +1,1 @@
+{"execution_mode":"ORT_SEQUENTIAL","inter_op_num_threads":1,"intra_op_num_threads":1,"provider":"CPUExecutionProvider","schema_version":1}

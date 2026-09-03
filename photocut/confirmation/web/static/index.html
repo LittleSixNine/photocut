@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>PhotoCut · 确认工作台</title>
+    <link rel="stylesheet" href="tokens.css">
+    <link rel="stylesheet" href="app.css">
+  </head>
+  <body>
+    <main id="workbench" tabindex="-1" aria-busy="true">
+      <header id="topbar" class="topbar">
+        <div class="brand" aria-label="PhotoCut Web 确认工作台">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <strong>PhotoCut</strong>
+          <span id="gui-identity" class="readout">GUI —</span>
+        </div>
+        <div class="file-summary">
+          <span id="filename" class="filename" title="">正在读取…</span>
+          <span id="progress" class="readout">— / —</span>
+        </div>
+        <span id="lease-state" class="lease-state">连接中</span>
+      </header>
+      <section id="photo-stage" aria-label="照片确认画布">
+        <img id="photo-preview" alt="当前待确认照片">
+        <svg id="corner-overlay" aria-label="照片四角" role="img" preserveAspectRatio="xMidYMid meet">
+          <polygon id="corner-polygon" points=""></polygon>
+          <g id="corner-points"></g>
+        </svg>
+        <div id="stage-loading" class="stage-loading" role="status">读取预览…</div>
+      </section>
+      <aside id="inspector" aria-label="当前候选检查器">
+        <section id="candidate-card" class="inspector-section">
+          <div class="section-heading">
+            <h1>当前候选</h1>
+            <span id="algorithm-version" class="readout">算法 —</span>
+          </div>
+          <div class="candidate-meta">
+            <span id="image-size" class="readout">— × — px</span>
+            <span id="dirty-state" class="state-dot">未修改</span>
+          </div>
+          <strong id="candidate-id" class="candidate-id">—</strong>
+          <p id="candidate-status" class="muted">等待会话状态</p>
+          <ul id="risk-list" class="risk-list" aria-label="风险提示"></ul>
+          <p id="action-error" class="action-error" role="alert" hidden></p>
+        </section>
+        <section class="inspector-section magnifier-section">
+          <div class="section-heading">
+            <h2>原像素放大</h2>
+            <span id="zoom-label" class="readout">—×</span>
+          </div>
+          <canvas id="magnifier" width="256" height="256" aria-label="当前角点原像素放大图"></canvas>
+          <div class="zoom-controls" aria-label="放大倍率">
+            <button id="zoom-2-button" type="button" disabled>2×</button>
+            <button id="zoom-4-button" type="button" disabled>4×</button>
+            <button id="zoom-8-button" type="button" disabled>8×</button>
+          </div>
+        </section>
+        <section class="inspector-section">
+          <h2>原图坐标</h2>
+          <ol id="corner-coordinates" class="coordinates"></ol>
+        </section>
+        <details id="technical-details" class="technical-details">
+          <summary>技术详情</summary>
+          <p id="details-status" class="details-status" role="status">展开后加载技术详情</p>
+          <dl id="details-list"></dl>
+          <pre id="candidate-audit" hidden></pre>
+        </details>
+      </aside>
+      <footer id="actionbar" aria-label="确认操作">
+        <div class="action-group" aria-label="导航">
+          <button id="previous-button" type="button" disabled>上一张</button>
+          <button id="next-button" type="button" disabled>下一张</button>
+        </div>
+        <div class="action-group" aria-label="候选调整">
+          <button id="candidate-button" type="button" disabled>切换候选 C</button>
+          <button id="v52-button" type="button" disabled>v5.2 备选 B</button>
+          <button id="reset-button" type="button" disabled>重置 R</button>
+          <button id="skip-button" type="button" disabled>跳过 X</button>
+        </div>
+        <div class="action-group action-group-primary">
+          <button id="pause-button" type="button" disabled>暂停 P</button>
+          <button id="quit-button" type="button" disabled>保存退出 Q</button>
+          <button id="confirm-button" class="primary" type="button" disabled>确认</button>
+        </div>
+      </footer>
+      <div id="error-banner" role="alert" hidden>
+        <strong>界面未能继续。</strong>
+        <span id="error-message">请查看终端并刷新页面。</span>
+      </div>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

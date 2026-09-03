@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "photocut"
+version = "0.1.0"
+description = "Detect, confirm, perspective-correct, and crop scanned photos locally."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "numpy>=2.0,<3",
+    "opencv-python>=4.10,<5",
+    "Pillow>=10.4,<13",
+    "onnxruntime>=1.20,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10",
+    "playwright>=1.50,<2",
+]
+
+[project.scripts]
+photocut = "photocut.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["photocut*"]
+
+[tool.setuptools.package-data]
+photocut = [
+    "algorithms/v8/assets/*.json",
+    "confirmation/web/static/*.css",
+    "confirmation/web/static/*.html",
+    "confirmation/web/static/*.js",
+    "models/v8_2/*.json",
+    "models/v8_2/*.onnx",
+    "models/v8_2/*.txt",
+    "selector/assets/*.json",
+]

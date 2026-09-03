@@ -1,0 +1,1 @@
+"""Packaged PhotoCut model artifacts."""

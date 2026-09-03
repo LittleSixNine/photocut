@@ -1,0 +1,5 @@
+PhotoCut V8.2 mask model
+
+The model is distributed under the PhotoCut MIT License. Its MobileNetV3
+backbone was initialized from TorchVision MobileNet_V3_Large_Weights.IMAGENET1K_V2.
+The upstream BSD-3-Clause notice is included in THIRD_PARTY_NOTICE.txt.

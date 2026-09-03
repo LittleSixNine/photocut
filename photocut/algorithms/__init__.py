@@ -1,0 +1,1 @@
+"""PhotoCut corner-detection algorithms."""

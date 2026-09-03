@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets and machine-specific configuration
+.env
+.env.*
+!.env.example
+.photocut-local.json
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Local photos, datasets, and generated output
+/input/
+/output/
+/outputs/
+/.photocut/
+.thumbs/
+*.jpg
+*.jpeg
+*.png
+*.JPG
+*.PNG
+
+# Research and local runs never belong in the public checkout.
+/experiments/
+
+# Local agent/session artifacts
+/.local/
+/.superpowers/
+/.codex/handoffs/
+/AGENTS.md
+/task_plan.md
+/findings.md
+/progress.md
+
+# Thumbnails
+*.thm
