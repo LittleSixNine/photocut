@@ -263,6 +263,58 @@ def select_confirmation_entries(corners_info, revise_filenames=(), annotation_st
     ]
 
 
+class _OriginAnnotationStore:
+    """Route inherited confirmations to their original append-only history."""
+
+    def __init__(self, current, entries):
+        self.current = current
+        self.path = current.path
+        self.routes = {}
+        dataset = DatasetStore(current.path.parents[2])
+        stores = {}
+        for entry in entries:
+            origin = entry.get("confirmation_origin_batch_id")
+            if origin is None:
+                continue
+            if not isinstance(origin, str) or Path(origin).name != origin:
+                raise ValueError("invalid confirmation origin batch")
+            paths = dataset.batch_paths_from_candidate(dataset.batches_dir / origin)
+            if paths is None:
+                raise ValueError("confirmation origin batch is unavailable")
+            if origin not in stores:
+                target = AnnotationStore(paths.annotations)
+                stores[origin] = (target, {event["annotation_id"]: event for event in target.events()})
+            target, events = stores[origin]
+            previous = events.get(entry.get("annotation_id"))
+            image_id = entry.get("image_id")
+            if previous is None or previous["image_id"] != image_id:
+                raise ValueError("confirmation origin has no matching image annotation")
+            if image_id in self.routes and self.routes[image_id].path != target.path:
+                raise ValueError("conflicting confirmation origins for the same image")
+            self.routes[image_id] = target
+
+    def events(self):
+        values = [event for event in self.current.events() if event["image_id"] not in self.routes]
+        grouped = {}
+        for image_id, target in self.routes.items():
+            grouped.setdefault(target.path, (target, set()))[1].add(image_id)
+        for target, image_ids in grouped.values():
+            values.extend(event for event in target.events() if event["image_id"] in image_ids)
+        return values
+
+    def latest_by_image(self):
+        values = {key: event for key, event in self.current.latest_by_image().items() if key not in self.routes}
+        grouped = {}
+        for image_id, target in self.routes.items():
+            grouped.setdefault(target.path, (target, set()))[1].add(image_id)
+        for target, image_ids in grouped.values():
+            values.update({key: event for key, event in target.latest_by_image().items() if key in image_ids})
+        return values
+
+    def append_idempotent(self, event):
+        return self.routes.get(event["image_id"], self.current).append_idempotent(event)
+
+
 def _annotation_store_from_reference(output_dir, project_root=None):
     reference_path = Path(output_dir) / BATCH_REFERENCE_FILE
     reference = json.loads(reference_path.read_text(encoding="utf-8"))
@@ -404,8 +456,8 @@ def _load_archived_v7_image(entry, output_dir: Path) -> np.ndarray | None:
 def _entry_uses_normalized_snapshot(entry) -> bool:
     used = entry.get("detector_used", entry.get("detector"))
     return (
-        entry.get("detector_requested") in {"auto", "v8"}
-        or used in {"v7", "v8"}
+        entry.get("detector_requested") in {"auto", "v8", "v8.4"}
+        or used in {"v7", "v8", "v8.4"}
         or (used == "manual_review" and isinstance(entry.get("cascade_v7_result"), dict))
     )
 
@@ -679,6 +731,8 @@ def create_confirmation_session(args, gui_version):
     project_root = Path(__file__).resolve().parents[2]
     annotation_store = _annotation_store_from_reference(output_dir, project_root)
     accepted = [entry for entry, _ in accepted_entries]
+    if any(entry.get("confirmation_origin_batch_id") for entry in accepted):
+        annotation_store = _OriginAnnotationStore(annotation_store, accepted)
     reconcile_confirmation_events(accepted, annotation_store)
     save_corners_info(str(json_path), corners_info)
     entries = select_confirmation_entries(

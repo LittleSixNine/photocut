@@ -40,7 +40,7 @@ ALGORITHM_VERSION = "5.2"
 V7_ALGORITHM_VERSION = "7.1"
 # Detector, selector, and GUI versions are intentionally independent.  The
 # stable ``auto-v4`` record identity remains compatible with existing batches.
-DEFAULT_DETECTOR = "auto"
+DEFAULT_DETECTOR = "v8.4"
 DEFAULT_SCENE_PROFILE = "scanner_white"
 
 # ========== v4.1 边缘检测参数 ==========

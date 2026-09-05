@@ -349,6 +349,13 @@ def _v7_view_model_for_entry(entry, image_size):
     """Create the pure v7 confirmation model for integration/testing."""
     if entry.get("auto_cascade_version") == "auto-v4":
         return AutoV4ConfirmationViewModel(entry, image_size=image_size)
+    if entry.get("detector_requested") == "v8.4":
+        projected = dict(entry)
+        projected["detection_status"] = (
+            "v7_low_confidence" if entry.get("success") and
+            entry.get("detection_status") == "candidate_requires_confirmation" else "error"
+        )
+        return V7ConfirmationViewModel.from_entry(projected, image_size=image_size)
     if entry.get("detector_used", entry.get("detector")) not in {"v7", "manual_review"}:
         return None
     try:
@@ -383,7 +390,9 @@ def build_initial_confirmation_state(entry, image_size, model):
 
 def candidate_snapshot(model, entry):
     algorithm_version = entry.get("confirmation_selected_algorithm_version")
-    if isinstance(model, V7ConfirmationViewModel):
+    if entry.get("detector_requested") == "v8.4":
+        algorithm_version = "8.4"
+    elif isinstance(model, V7ConfirmationViewModel):
         algorithm_version = (
             ALGORITHM_VERSION
             if model.selection == "v52"

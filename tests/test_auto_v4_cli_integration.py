@@ -48,7 +48,7 @@ class AutoV4CliIntegrationTests(unittest.TestCase):
         with patch.object(
             sys,
             "argv",
-            ["photocut_cli.py", "input", "--detect", "--auto-engine", "v7"],
+            ["photocut_cli.py", "input", "--detect", "--detector", "auto", "--auto-engine", "v7"],
         ), patch("photocut.cli.detect_command") as command:
             photocut_cli.main()
 

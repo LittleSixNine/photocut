@@ -92,13 +92,13 @@ class V7CliSelectionTests(unittest.TestCase):
             risks=risks, error=error,
         )
 
-    def test_omitted_detector_uses_auto_v7_first_default(self):
+    def test_omitted_detector_uses_v84_default(self):
         with patch.object(sys, "argv", ["photocut_cli.py", "input", "--detect"]), patch(
             "photocut.cli.detect_command"
         ) as command:
             photocut_cli.main()
         args = command.call_args.args[0]
-        self.assertEqual("auto", args.detector)
+        self.assertEqual("v8.4", args.detector)
         self.assertIsNone(args.v7_mode)
         self.assertIsNone(args.scene_profile)
 
@@ -117,7 +117,7 @@ class V7CliSelectionTests(unittest.TestCase):
         with patch.object(
             sys,
             "argv",
-            ["photocut_cli.py", "input", "--detect", "--scene-profile", "generic_single"],
+            ["photocut_cli.py", "input", "--detect", "--detector", "auto", "--scene-profile", "generic_single"],
         ), patch("photocut.cli.detect_command") as command:
             photocut_cli.main()
 

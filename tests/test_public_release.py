@@ -74,3 +74,13 @@ def test_environment_override_has_priority(tmp_path, monkeypatch):
     monkeypatch.setenv("PHOTOCUT_DATASET_ROOT", str(target))
 
     assert default_dataset_root(tmp_path / "project") == target
+
+
+def test_package_version_and_v84_model_data_are_declared():
+    import photocut
+
+    package_config = (ROOT / "pyproject.toml").read_text()
+    assert photocut.__version__ == "0.2.0"
+    assert f'version = "{photocut.__version__}"' in package_config
+    for suffix in ("json", "onnx", "txt"):
+        assert f'"models/v8_4/*.{suffix}"' in package_config

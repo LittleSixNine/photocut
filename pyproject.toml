@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "photocut"
-version = "0.1.0"
+version = "0.2.0"
 description = "Detect, confirm, perspective-correct, and crop scanned photos locally."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = {file = "LICENSE"}
 dependencies = [
     "numpy>=2.0,<3",
     "opencv-python>=4.10,<5",
@@ -37,5 +37,8 @@ photocut = [
     "models/v8_2/*.json",
     "models/v8_2/*.onnx",
     "models/v8_2/*.txt",
+    "models/v8_4/*.json",
+    "models/v8_4/*.onnx",
+    "models/v8_4/*.txt",
     "selector/assets/*.json",
 ]

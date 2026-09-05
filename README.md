@@ -1,6 +1,6 @@
 # PhotoCut
 
-最新研究检查点：`v8.3.0-single-model-research1`（2026-09-05）。单模型四角检测已取得阶段进展，详见 [变更日志](CHANGELOG.md)。本公开版本继续使用随仓库提供的 V8.2 模型。
+当前算法：**V8.4**；Python 软件包：**0.2.0**（2026-09-06）。默认使用单个四边预测网络检测四角，检测后须在 GUI 2.0 中确认。详见 [V8.4 说明](docs/V8.4.md)和[变更日志](CHANGELOG.md)。
 
 PhotoCut 用来批量裁剪扫描照片：自动检测照片四角，在本机浏览器中确认或调整，然后完成透视校正和裁剪。所有照片都只在本机处理。
 
@@ -45,7 +45,7 @@ source .venv/bin/activate        # Windows：.venv\Scripts\activate
 python3 -m pip install -e .
 ```
 
-仓库已经包含可以再分发的 V8.2 ONNX 模型，不需要另外下载模型，默认的 PhotoCut Selector v4 可以直接运行。
+仓库包含可再分发的 V8.4 ONNX 推理模型，不需要另外下载，也不需要安装 PyTorch。旧 V8.2 模型保留用于显式回滚。
 
 ## 使用
 
@@ -64,21 +64,25 @@ photocut input --crop
 
 默认输出到输入文件夹旁边的 `<文件夹名>裁剪/`。裁剪时会向内缩进 50 个原图像素以去除扫描白边，源照片不会被修改。
 
-默认场景是一张放在白色扫描仪底面上的实体照片。其他单照片背景可使用：
+V8.4 面向白色扫描底上的单张照片。所有合法检测结果都需要人工确认；无法给出合法四角时不提供可裁剪坐标，当前界面可跳过。它尚未校准自动接受策略。
+
+如需使用旧版 PhotoCut Selector v4，显式选择 `--detector auto`。旧流程的其他单照片背景配置可使用：
 
 ```bash
-photocut input --scene-profile generic_single --detect
+photocut input --detector auto --scene-profile generic_single --detect
 ```
 
 也可以继续使用兼容入口 `python3 photocut_cli.py ...`。
 
 ## 版本
 
-- PhotoCut Selector v4：默认选择和编排逻辑；历史记录中的机器标识仍为 `auto-v4`
-- V8.2：默认白色扫描底检测器
-- V7.1：候选生成和安全回退
-- v5.2：兼容检测器
-- GUI 2.0：默认的本机浏览器确认界面
+- V8.4：默认检测器（`--detector v8.4`），单个网络预测四边，再由同一网络的位置方差加权求四角；不调用旧模型选择或救回结果。
+- PhotoCut Selector v4：显式 `--detector auto` 使用的旧选择和编排逻辑，历史记录标识保持 `auto-v4`。
+- V8.2、V7.1、v5.2：分别通过 `--detector v8`、`v7`、`v5.2` 使用的兼容检测器。
+- GUI 2.0：本机浏览器确认界面。
+- 0.2.0：Python 软件包版本，与检测算法版本独立。
+
+V8.4 在全部参与训练的 320 张照片上有 314 张合法且四角误差均不超过图像对角线的 0.5%（98.1%）。来源分组验证为 294/320（91.9%），来源也已用于历史研究，仍不是独立盲测。不能把 98.1% 当作新照片的泛化准确率；具体比较和残余问题见 [V8.4 说明](docs/V8.4.md)。
 
 ## 测试
 
@@ -90,4 +94,4 @@ python3 scripts/check_public_tree.py
 
 ## 许可
 
-PhotoCut 源码和随项目提供的 V8.2 模型使用 MIT License。模型使用了由 TorchVision 权重初始化的 MobileNetV3 backbone，随模型保留了 BSD-3-Clause 上游声明。
+PhotoCut 源码和随项目提供的 V8.4、V8.2 ONNX 模型使用 [MIT License](LICENSE)。模型使用由 TorchVision 权重初始化的 MobileNetV3 backbone，随各模型保留 BSD-3-Clause 上游声明。公开发布仅包含部署所需模型与脱敏汇总；研究照片、标注、训练检查点和逐图诊断不随仓库发布。

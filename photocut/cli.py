@@ -55,6 +55,7 @@ from photocut.core import (
     detect_and_save_corners,
     detect_and_save_corners_auto,
     detect_and_save_corners_v7,
+    detect_and_save_corners_v84,
     detect_and_save_corners_v8_dormant,
     crop_image,
     load_corners_info,
@@ -473,8 +474,8 @@ def observe_confirmation_frame(
 def add_detector_arguments(parser, *, default=argparse.SUPPRESS) -> None:
     """Add detector selection to both legacy and subcommand CLI forms."""
     parser.add_argument(
-        "--detector", choices=("auto", "v5.2", "v7", "v8"), default=default,
-        help=f"角点检测器（默认 {SELECTOR_NAME}；也可显式选择 v5.2、V7 或 V8）",
+        "--detector", choices=("v8.4", "auto", "v5.2", "v7", "v8"), default=default,
+        help="角点检测器（默认 V8.4，所有结果需人工确认；auto 为旧版回滚）",
     )
     parser.add_argument(
         "--v7-mode", choices=("safe", "aggressive"), default=argparse.SUPPRESS,
@@ -706,7 +707,7 @@ def _preserve_confirmed_detection(previous, info, *, detector: str = DEFAULT_DET
     if not previous or not previous.get("confirmed"):
         return
     used_detector = info.get("detector_used", detector)
-    if used_detector in {"v7", "v8", "manual_review"}:
+    if used_detector in {"v7", "v8", "v8.4", "manual_review"}:
         # A normalized modern result is only allowed to inherit confirmation when it is for
         # the same immutable source identity and the previous record carries a
         # durable annotation head.  Otherwise fail closed and leave the new
@@ -721,6 +722,15 @@ def _preserve_confirmed_detection(previous, info, *, detector: str = DEFAULT_DET
             info["manual_corners"] = None
             info["manual_preview_corners"] = None
             return
+    if used_detector == "v8.4":
+        origin = previous.get("confirmation_origin_batch_id") or previous.get("batch_id")
+        if origin:
+            info["confirmation_origin_batch_id"] = origin
+        # Preserve the approved boundary, including an accepted unadjusted result.
+        for field in ("boundary_corners", "corners", "preview_corners"):
+            if field in previous:
+                info[field] = copy.deepcopy(previous[field])
+        info["success"] = bool(previous.get("success"))
     info["confirmed"] = True
     if previous.get("annotation_id") is not None:
         info["annotation_id"] = previous["annotation_id"]
@@ -1380,7 +1390,7 @@ def _runtime_for_detection(
     v8_runtime: V8CliRuntime | Any | None = None,
     auto_runtime: AutoV4Runtime | None = None,
 ):
-    # argparse always supplies the configured default (auto).  Direct Python
+    # argparse always supplies the configured default (V8.4).  Direct Python
     # callers from the pre-v7 API may omit the field; preserve their legacy
     # v5.2 behavior instead of silently changing an in-process call.
     detector = getattr(args, "detector", None)
@@ -1455,6 +1465,15 @@ def _runtime_for_detection(
                     detector_parameters[
                         "v8_boundary_quality_artifact_sha256"
                     ] = boundary_quality_sha256
+    elif detector == "v8.4":
+        if v8_runtime is None:
+            raise RuntimeError("V8.4 runtime is required")
+        runtime_algorithm_version = "8.4"
+        detector_parameters = {
+            "detector": "v8.4", "detector_requested": "v8.4",
+            "scene_profile": "scanner_white", "model_sha256": v8_runtime.model_sha256,
+            "requires_confirmation": True,
+        }
     elif detector == "v8":
         if v8_runtime is None:
             raise RuntimeError("V8 检测需要先加载已验证的本机运行文件")
@@ -1509,6 +1528,13 @@ def _selected_detection(
     auto_runtime: AutoV4Runtime | None = None,
 ):
     """Dispatch one image while keeping the v5.2 call path untouched."""
+    if detector == "v8.4":
+        if (scene_profile or DEFAULT_SCENE_PROFILE) != "scanner_white":
+            raise ValueError("V8.4 supports scanner_white; use --detector auto --scene-profile generic_single")
+        return detect_and_save_corners_v84(
+            str(img_path), output_dir, runtime=v8_runtime, loaded_input=loaded_input,
+            relative_path=relative_path, request_id=request_id, image_id=image_id,
+        )
     if detector == "v7":
         return detect_and_save_corners_v7(
             str(img_path), output_dir, img=img, v7_mode=v7_mode or "safe",
@@ -1580,7 +1606,7 @@ def _prepare_detection_input(
     scene_profile: str | None = None,
 ):
     """Prepare one archived detection input without pre-decoding V7 at full size."""
-    if detector in {"auto", "v7", "v8"}:
+    if detector in {"auto", "v7", "v8", "v8.4"}:
         from photocut.algorithms.v7.input import decode_bytes_for_analysis
         from photocut.algorithms.v7.parameters import V7Parameters
 
@@ -1750,9 +1776,9 @@ def _result_from_info(info):
         "error": info.get("error_message"),
         "legacy_info": info,
     }
-    if (info.get("detector") in {"v7", "auto", "v8"} or
-            info.get("detector_used") in {"v7", "auto", "v8"} or
-            info.get("detector_requested") in {"v7", "auto", "v8"}):
+    if (info.get("detector") in {"v7", "auto", "v8", "v8.4"} or
+            info.get("detector_used") in {"v7", "auto", "v8", "v8.4"} or
+            info.get("detector_requested") in {"v7", "auto", "v8", "v8.4"}):
         result.update({
             "detector": info.get("detector"),
             "detector_requested": info.get("detector_requested"),
@@ -1769,6 +1795,10 @@ def _result_from_info(info):
             "v7_mode": info.get("v7_mode"),
             "scene_profile": info.get("scene_profile"),
         })
+        if info.get("detector_requested") == "v8.4":
+            result.update({key: info.get(key) for key in (
+                "model_sha256", "v84_status", "requires_confirmation",
+            )})
         if info.get("detector_requested") == "v8":
             result.update({
                 "v8_policy_sha256": info.get("v8_policy_sha256"),
@@ -1840,7 +1870,23 @@ def _decode_failure_info(source, source_id, image_id, batch_id, run_id, filename
         "adjust_count": 0,
         "adjust_timestamp": None,
     }
-    if detector in {"v7", "auto", "v8"}:
+    if detector == "v8.4":
+        digest = getattr(v8_runtime, "model_sha256", None)
+        info.update({
+            "algorithm_version": "8.4", "detector": "v8.4",
+            "detector_requested": "v8.4", "detector_used": "v8.4",
+            "model_sha256": digest, "detection_status": "error", "v84_status": "error",
+            "requires_confirmation": True, "scene_profile": "scanner_white",
+            "source_sha256": image_id.removeprefix("sha256:"),
+            "detection_id": source_id, "normalized_orientation": "unknown",
+            "detection_identity": {
+                "request_id": source_id, "image_id": image_id,
+                "algorithm_version": "8.4", "model_sha256": digest,
+                "orientation_transform": "unknown", "mode": "requires_confirmation",
+            },
+        })
+        return info
+    if detector in {"v7", "auto", "v8", "v8.4"}:
         from photocut.algorithms.v7.parameters import V7Parameters
         mode = v7_mode or "safe"
         profile = scene_profile or DEFAULT_SCENE_PROFILE
@@ -2004,7 +2050,7 @@ def detect_command(args) -> None:
     shrink_min = args.shrink_min
     shrink_max = args.shrink_max
     params = effective_detection_parameters(getattr(args, "threshold", None))
-    # argparse supplies the configured default (auto).  Direct Python callers
+    # argparse supplies the configured default (V8.4).  Direct Python callers
     # from the legacy API may omit this field; keep those calls on v5.2.
     detector = getattr(args, "detector", None)
     if detector is None:
@@ -2020,6 +2066,11 @@ def detect_command(args) -> None:
 
     print(f"找到 {len(images)} 张图片")
     v8_runtime = _v8_runtime_from_args(args) if detector == "v8" else None
+    if detector == "v8.4":
+        if scene_profile != "scanner_white":
+            raise ValueError("V8.4 supports scanner_white; use --detector auto --scene-profile generic_single")
+        from photocut.algorithms.v8_4.runtime import V84Runtime
+        v8_runtime = V84Runtime()
     auto_runtime = None
 
     # 加载已存在的 corners_info（只保留当前input中存在的图片记录）
@@ -2037,7 +2088,7 @@ def detect_command(args) -> None:
         print("警告：数据归档已关闭，本批次不会进入长期数据集")
         for i, (img_path, filename) in enumerate(images, 1):
             print(f"[{i}/{len(images)}] 检测: {filename}", end=" ")
-            if detector in {"v7", "auto", "v8"}:
+            if detector in {"v7", "auto", "v8", "v8.4"}:
                 source = Path(img_path)
                 try:
                     img, loaded_input, _ = _prepare_detection_input(
@@ -3042,7 +3093,7 @@ def run_opencv_confirmation(session) -> None:
             if v7_model is not None:
                 cv2.putText(
                     sidebar,
-                    f"{SELECTOR_NAME if isinstance(v7_model, AutoV4ConfirmationViewModel) else 'V7'}: {v7_model.status_label}",
+                    f"{SELECTOR_NAME if isinstance(v7_model, AutoV4ConfirmationViewModel) else 'Detector'}: {v7_model.status_label}",
                     (15, 185), cv2.FONT_HERSHEY_SIMPLEX, 0.55,
                     (0, 220, 255) if v7_model.can_confirm else (0, 120, 255), 1,
                 )
@@ -3244,8 +3295,11 @@ def main():
             getattr(args, "detector", DEFAULT_DETECTOR) != "auto"):
         parser.error("--auto-engine requires --detector auto")
     if (getattr(args, "scene_profile", None) is not None and
-            getattr(args, "detector", DEFAULT_DETECTOR) not in {"auto", "v7", "v8"}):
-        parser.error("--scene-profile requires --detector auto, v7, or v8")
+            getattr(args, "detector", DEFAULT_DETECTOR) not in {"auto", "v7", "v8", "v8.4"}):
+        parser.error("--scene-profile requires --detector v8.4, auto, v7, or v8")
+    if (getattr(args, "detector", DEFAULT_DETECTOR) == "v8.4" and
+            getattr(args, "scene_profile", None) not in {None, "scanner_white"}):
+        parser.error("V8.4 supports scanner_white; use --detector auto --scene-profile generic_single")
     if (getattr(args, "detector", DEFAULT_DETECTOR) == "v8" and
             getattr(args, "scene_profile", None) not in {None, "scanner_white"}):
         parser.error("--detector v8 only supports --scene-profile scanner_white")

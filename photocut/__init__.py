@@ -5,7 +5,7 @@ Core image dependencies are loaded lazily so algorithm-only imports stay light.
 
 from importlib import import_module
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 _CORE_EXPORTS = {
     "apply_annotation_to_entry",
@@ -14,6 +14,7 @@ _CORE_EXPORTS = {
     "detect_and_save_corners",
     "detect_and_save_corners_auto",
     "detect_and_save_corners_v7",
+    "detect_and_save_corners_v84",
     "detect_and_save_corners_v8_dormant",
     "load_corners_info",
     "load_image",

@@ -93,11 +93,13 @@ def test_false_property_or_event_tokens_do_not_cancel_refinement(token):
 
 
 @pytest.mark.parametrize("deadline", [
-    time.monotonic() + 300.0,
+    "future",
     lambda: False,
     type("Expiry", (), {"is_expired": False})(),
 ])
 def test_future_or_false_deadlines_do_not_timeout(deadline):
+    if deadline == "future":
+        deadline = time.monotonic() + 300.0
     image, truth = _image(((34, 46), (278, 28), (286, 194), (22, 211)))
     result = refine_quad(ImageFeatureContext(image), truth, params=V7Parameters(), deadline=deadline)
     assert "refinement_timeout" not in result.risks

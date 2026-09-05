@@ -829,6 +829,51 @@ def _map_analysis_entry_to_full(entry: Dict[str, Any], loaded: Any) -> Dict[str,
     return entry
 
 
+def detect_and_save_corners_v84(
+    img_path: str, output_dir: str, *, runtime: Any, loaded_input: Any,
+    relative_path: Optional[str] = None, request_id: Optional[str] = None,
+    image_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Project one V8.4 candidate; every new result requires human confirmation."""
+    if loaded_input is None:
+        raise ValueError("V8.4 requires a decoded, normalized input")
+    prediction = runtime.predict(loaded_input)
+    status = prediction["status"]
+    points = prediction.get("analysis_corners")
+    valid = status == "candidate_requires_confirmation" and points is not None
+    corners = [[float(x), float(y)] for x, y in points] if valid else []
+    identity = {
+        "request_id": request_id or loaded_input.source_sha256,
+        "image_id": image_id or "sha256:" + loaded_input.source_sha256,
+        "orientation_transform": loaded_input.orientation_transform,
+        "algorithm_version": "8.4", "model_sha256": runtime.model_sha256,
+        "mode": "requires_confirmation",
+    }
+    entry = {
+        "filename": relative_path or os.path.basename(img_path),
+        "algorithm_version": "8.4", "detector": "v8.4",
+        "detector_requested": "v8.4", "detector_used": "v8.4",
+        "model_sha256": runtime.model_sha256, "v84_status": status,
+        "detection_status": status, "detection_identity": identity,
+        "detection_id": identity["request_id"],
+        "detection_parameters": {"model_sha256": runtime.model_sha256},
+        "scene_profile": "scanner_white", "source_sha256": loaded_input.source_sha256,
+        "source_original_size": list(loaded_input.original_size),
+        "normalized_orientation": loaded_input.orientation_transform,
+        "success": valid, "confirmed": False, "requires_confirmation": True,
+        "manually_adjusted": False, "algorithm_generated": True,
+        "manual_corners": None, "manual_preview_corners": None,
+        "crop_corners": None, "inset": None, "adjust_count": 0,
+        "adjust_timestamp": None, "error_message": prediction.get("reason"),
+        "confidences": [], "risks": ["需要人工确认"] if valid else [status],
+        "candidate_sources": ["v8.4"], "alternate_corners": None,
+        "candidate_audit": [], "detection_debug": {**prediction, "analysis_corners": corners if valid else None},
+    }
+    for field in ("algorithm_boundary_corners", "boundary_corners", "algorithm_corners", "corners"):
+        entry[field] = [point[:] for point in corners]
+    return _map_analysis_entry_to_full(entry, loaded_input)
+
+
 def detect_and_save_corners_auto(
     img_path: str,
     output_dir: str,

@@ -496,9 +496,9 @@ def test_generic_profile_is_rejected_before_v7_or_model_runs():
     v7.assert_not_called()
 
 
-def test_cli_exposes_opt_in_v8_while_default_remains_auto():
+def test_cli_exposes_v84_and_explicit_legacy_detector_choices():
     parser = argparse.ArgumentParser()
     photocut_cli.add_detector_arguments(parser, default="auto")
     detector = next(action for action in parser._actions if action.dest == "detector")
-    assert tuple(detector.choices) == ("auto", "v5.2", "v7", "v8")
-    assert photocut_cli.DEFAULT_DETECTOR == "auto"
+    assert tuple(detector.choices) == ("v8.4", "auto", "v5.2", "v7", "v8")
+    assert photocut_cli.DEFAULT_DETECTOR == "v8.4"

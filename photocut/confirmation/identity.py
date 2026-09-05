@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import math
+from numbers import Real
 
 from photocut.confirmation.model import _validate_integer_corners
 from photocut.confirmation.version import validate_version
@@ -76,14 +78,33 @@ def match_finalized_detection(
     if entry_detection_id is not None and row.get("detection_id") != entry_detection_id:
         return None
     try:
-        recorded = _validate_integer_corners(
-            row.get("algorithm_boundary_corners"),
-            "algorithm_boundary_corners",
-        )
-        mutable = _validate_integer_corners(
-            entry.get("algorithm_boundary_corners"),
-            "algorithm_boundary_corners",
-        )
+        if row.get("detector_requested") == "v8.4":
+            # Compare the immutable floating prediction before adapting to the
+            # existing integer GUI/annotation contract; never round detection data.
+            recorded_raw = row.get("algorithm_boundary_corners")
+            mutable_raw = entry.get("algorithm_boundary_corners")
+            if recorded_raw != mutable_raw or not isinstance(recorded_raw, (list, tuple)) or len(recorded_raw) != 4:
+                return None
+            digest = row.get("model_sha256")
+            if not isinstance(digest, str) or not digest.startswith("sha256:") or len(digest) != 71:
+                return None
+            if entry.get("model_sha256") != digest or row.get("algorithm_version") != "8.4":
+                return None
+            for point in recorded_raw:
+                if not isinstance(point, (list, tuple)) or len(point) != 2 or any(
+                    isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value)
+                    for value in point
+                ):
+                    return None
+            recorded = [[int(value) for value in point] for point in recorded_raw]
+            mutable = recorded
+        else:
+            recorded = _validate_integer_corners(
+                row.get("algorithm_boundary_corners"), "algorithm_boundary_corners",
+            )
+            mutable = _validate_integer_corners(
+                entry.get("algorithm_boundary_corners"), "algorithm_boundary_corners",
+            )
         version = validate_version(row.get("algorithm_version"), "algorithm_version")
     except ValueError:
         return None

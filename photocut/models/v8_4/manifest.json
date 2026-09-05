@@ -1,0 +1,38 @@
+{
+  "algorithm_version": "8.4",
+  "architecture": "single_mobilenet_multiscale_four_lines_v1",
+  "automatic_acceptance_calibrated": false,
+  "backbone_initialization": "TorchVision MobileNet_V3_Large_Weights.IMAGENET1K_V2",
+  "checkpoint_sha256": "sha256:5521ef913840d3dd05d3242e87f94dd9a0800e2713aacff6aee2e9d62e087936",
+  "coordinate_system": "normalized_minus1_plus1_half_pixel",
+  "corner_order": [
+    "top_left",
+    "top_right",
+    "bottom_right",
+    "bottom_left"
+  ],
+  "input_name": "image",
+  "input_shape": [
+    1,
+    3,
+    1024,
+    1024
+  ],
+  "interpretation": "314/320 is training-set fit, not independent generalization accuracy; candidates require confirmation.",
+  "license": "MIT",
+  "model_sha256": "sha256:6a1e5b3b226026dc0acfd1b12fe85ff262d3e771c85acaf4498aee03b72a42cc",
+  "opset": 17,
+  "output_name": "corners",
+  "output_shape": [
+    1,
+    4,
+    2
+  ],
+  "preprocessing": "BGR_to_RGB_letterbox_128_ImageNet_mean_std",
+  "readout": "support_divided_by_position_variance_plus_bin_width_squared",
+  "runtime": "onnxruntime_CPUExecutionProvider",
+  "source_grouped_out_of_fold_legal_strict": 294,
+  "strict_threshold": "all_four_corner_errors_le_0.005_image_diagonal_and_legal_geometry",
+  "training_count": 320,
+  "training_set_legal_strict": 314
+}

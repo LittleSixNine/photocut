@@ -9,7 +9,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWED_LARGE_FILES = {"photocut/models/v8_2/model.onnx"}
+ALLOWED_MODEL_FILES = {
+    "photocut/models/v8_2/model.onnx",
+    "photocut/models/v8_4/model.onnx",
+}
+ALLOWED_LARGE_FILES = ALLOWED_MODEL_FILES
+MODEL_SUFFIXES = {".onnx", ".pt", ".pth", ".ckpt", ".safetensors", ".h5", ".hdf5"}
 ALLOWED_IMAGE_FILES = {
     "assets/readme/example-01-after.jpg",
     "assets/readme/example-01-before.jpg",
@@ -63,6 +68,8 @@ def main() -> int:
         if FORBIDDEN_PARTS.intersection(path.relative_to(ROOT).parts):
             errors.append(f"private/generated path is tracked: {relative}")
             continue
+        if path.suffix.lower() in MODEL_SUFFIXES and relative not in ALLOWED_MODEL_FILES:
+            errors.append(f"unapproved model or training checkpoint: {relative}")
         size = path.stat().st_size
         if size > 5 * 1024 * 1024 and relative not in ALLOWED_LARGE_FILES:
             errors.append(f"unexpected file larger than 5 MiB: {relative}")

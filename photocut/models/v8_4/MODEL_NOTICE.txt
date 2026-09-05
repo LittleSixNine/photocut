@@ -1,0 +1,10 @@
+PhotoCut V8.4 single-network corner model
+
+The model is distributed under the PhotoCut MIT License. Its MobileNetV3
+backbone was initialized from TorchVision MobileNet_V3_Large_Weights.IMAGENET1K_V2.
+The upstream BSD-3-Clause notice is included in THIRD_PARTY_NOTICE.txt.
+
+This exported inference artifact contains model parameters, not source photos
+or annotations. The 314/320 result measures fit on the training population;
+the source-grouped out-of-fold result is 294/320. Neither establishes automatic
+acceptance calibration. Every valid proposal requires user confirmation.

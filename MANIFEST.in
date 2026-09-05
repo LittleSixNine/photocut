@@ -1,0 +1,5 @@
+include CHANGELOG.md CONTRIBUTING.md
+include docs/V8.4.md
+include scripts/check_public_tree.py
+include assets/readme/example-01-before.jpg assets/readme/example-01-after.jpg
+include assets/readme/example-02-before.jpg assets/readme/example-02-after.jpg
