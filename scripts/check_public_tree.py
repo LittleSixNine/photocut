@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_MODEL_FILES = {
     "photocut/models/v8_2/model.onnx",
     "photocut/models/v8_4/model.onnx",
+    "photocut/models/v8_5/model.onnx",
+    "photocut/models/v8_6/model.onnx",
 }
 ALLOWED_LARGE_FILES = ALLOWED_MODEL_FILES
 MODEL_SUFFIXES = {".onnx", ".pt", ".pth", ".ckpt", ".safetensors", ".h5", ".hdf5"}

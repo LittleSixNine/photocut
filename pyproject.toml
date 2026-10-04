@@ -40,5 +40,11 @@ photocut = [
     "models/v8_4/*.json",
     "models/v8_4/*.onnx",
     "models/v8_4/*.txt",
+    "models/v8_5/*.json",
+    "models/v8_5/*.onnx",
+    "models/v8_5/*.txt",
+    "models/v8_6/*.json",
+    "models/v8_6/*.onnx",
+    "models/v8_6/*.txt",
     "selector/assets/*.json",
 ]

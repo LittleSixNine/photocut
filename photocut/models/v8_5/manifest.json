@@ -1,0 +1,58 @@
+{
+  "algorithm_version": "8.4",
+  "automatic_acceptance_calibrated": false,
+  "checkpoint_sha256": "sha256:9e8be1a7a6ca9e14d96f8978d9e0136e19ea77918f0af0c47670ff3970b3a86d",
+  "coordinate_system": "normalized_minus1_plus1_half_pixel",
+  "corner_order": [
+    "top_left",
+    "top_right",
+    "bottom_right",
+    "bottom_left"
+  ],
+  "experiment": "E52",
+  "input_shape": [
+    1,
+    3,
+    1024,
+    1024
+  ],
+  "interpretation": "Research candidate using the V8.4 runtime contract. Training fit is not independent generalization accuracy. All candidates require human confirmation.",
+  "model_sha256": "sha256:9df6f7afcfef0ecbbc4914f029c8c747e8071f7c812c62e982758fa7df9772ab",
+  "output_shape": [
+    1,
+    4,
+    2
+  ],
+  "production_promotion": false,
+  "research_candidate": true,
+  "source_grouped_out_of_fold": {
+    "both_strict": 235,
+    "catastrophic": 0,
+    "invalid": 5,
+    "max_error_max": 0.03643472042473997,
+    "max_error_median": 0.0020590880994643657,
+    "max_error_p95": 0.008192991475787278,
+    "max_error_px_max": 752.0357111918257,
+    "max_error_px_median": 27.398459023999433,
+    "max_error_px_p95": 117.0609844313765,
+    "missing": 0,
+    "n": 320,
+    "strict": 291,
+    "strict50": 237
+  },
+  "training_fit": {
+    "both_strict": 304,
+    "catastrophic": 0,
+    "invalid": 0,
+    "max_error_max": 0.00558461060891737,
+    "max_error_median": 0.0011793221055743123,
+    "max_error_p95": 0.002556440054390025,
+    "max_error_px_max": 79.40842538581134,
+    "max_error_px_median": 14.460298109587608,
+    "max_error_px_p95": 47.071144865845206,
+    "missing": 0,
+    "n": 320,
+    "strict": 318,
+    "strict50": 306
+  }
+}

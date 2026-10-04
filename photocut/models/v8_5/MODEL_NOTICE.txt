@@ -1,0 +1,11 @@
+PhotoCut V8.5.0 (E52) archived research candidate
+
+Distributed under the PhotoCut MIT License. MobileNetV3 initialization came
+from TorchVision MobileNet_V3_Large_Weights.IMAGENET1K_V2; its BSD-3-Clause
+notice is included.
+
+This is a separate opt-in model archive, not the default detector. The
+original manifest uses the shared V8.4 runtime contract; version.json names
+the candidate. Training fit is not accuracy on new photos. Valid proposals
+require human confirmation. Source photos, annotations and per-image
+research evidence are not distributed with this model.

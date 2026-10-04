@@ -1,0 +1,42 @@
+{
+  "version": "8.5.0",
+  "experiment": "E52",
+  "status": "archived_research_candidate",
+  "default": false,
+  "runtime_contract": "8.4",
+  "model_sha256": "sha256:9df6f7afcfef0ecbbc4914f029c8c747e8071f7c812c62e982758fa7df9772ab",
+  "training_fit": {
+    "both_strict": 304,
+    "catastrophic": 0,
+    "invalid": 0,
+    "max_error_max": 0.00558461060891737,
+    "max_error_median": 0.0011793221055743123,
+    "max_error_p95": 0.002556440054390025,
+    "max_error_px_max": 79.40842538581134,
+    "max_error_px_median": 14.460298109587608,
+    "max_error_px_p95": 47.071144865845206,
+    "missing": 0,
+    "n": 320,
+    "strict": 318,
+    "strict50": 306
+  },
+  "source_grouped_out_of_fold": {
+    "both_strict": 235,
+    "catastrophic": 0,
+    "invalid": 5,
+    "max_error_max": 0.03643472042473997,
+    "max_error_median": 0.0020590880994643657,
+    "max_error_p95": 0.008192991475787278,
+    "max_error_px_max": 752.0357111918257,
+    "max_error_px_median": 27.398459023999433,
+    "max_error_px_p95": 117.0609844313765,
+    "missing": 0,
+    "n": 320,
+    "strict": 291,
+    "strict50": 237
+  },
+  "manual_confirmation_required": true,
+  "automatic_acceptance_calibrated": false,
+  "original_manifest_preserved": true,
+  "interpretation": "Version labels name archived candidates. Runtime manifest retains its verified V8.4 interface contract. No default or CLI change; not a new-source accuracy claim."
+}
